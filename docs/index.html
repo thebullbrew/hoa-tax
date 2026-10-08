@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The HOA Tax — The True Lifetime Cost of HOA Dues</title>
+<meta name="description" content="HOA dues look small per month. Over a hold, they become a second mortgage. This calculator shows the true lifetime cost of HOA dues and special assessments — with escalation, opportunity cost, and the deal-survival math.">
+<meta name="theme-color" content="#120D08">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<style>
+:root{
+  --bg:#120D08; --surface:#1E150D; --surface2:#241A10;
+  --text:#F3ECDD; --muted:#B9A98C; --dim:#8A7A60;
+  --copper:#C08040; --copper-hi:#E09A52; --bronze:#7A4A22; --bronze-deep:#4A2E16;
+  --warn:#D46A4A; --line:rgba(192,128,64,.28);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.55; font-size:16px;
+  background-image:
+    radial-gradient(1200px 500px at 50% -80px, rgba(192,128,64,.10), transparent 60%),
+    radial-gradient(900px 600px at 100% 100%, rgba(122,74,34,.08), transparent 60%);
+}
+.serif{font-family:Georgia,"Palatino Linotype","Book Antiqua",Palatino,serif}
+.wrap{max-width:1060px;margin:0 auto;padding:0 18px 90px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- hero ---------- */
+.hero{padding:64px 0 8px;text-align:center}
+.eyebrow{letter-spacing:.34em;text-transform:uppercase;font-size:11px;color:var(--copper);margin-bottom:14px}
+.hero h1{font-size:clamp(40px,7vw,74px);line-height:1.04;margin:0 0 10px;color:var(--text);font-weight:700}
+.hero h1 .cop{color:var(--copper)}
+.dek{max-width:640px;margin:14px auto 0;color:var(--muted);font-size:clamp(15px,2.4vw,18px)}
+.rule{display:flex;align-items:center;gap:12px;margin:34px auto;max-width:560px;color:var(--bronze)}
+.rule::before,.rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line))}
+.rule::after{background:linear-gradient(90deg,var(--line),transparent)}
+.rule span{font-size:18px}
+
+/* ---------- layout ---------- */
+.grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+@media(min-width:920px){.grid.two{grid-template-columns:1fr 1fr}.grid.inputs{grid-template-columns:1.05fr .95fr}}
+.card{background:var(--surface);border:1px solid var(--bronze);border-radius:10px;padding:26px;position:relative}
+.card::before{content:"";position:absolute;top:0;left:14px;right:14px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(224,154,82,.55),transparent)}
+.card h2{font-size:22px;margin:0 0 4px;color:var(--text)}
+.card h2 .no{color:var(--copper);font-size:15px;letter-spacing:.2em;margin-right:8px}
+.sub{color:var(--dim);font-size:13.5px;margin:0 0 18px}
+
+/* ---------- inputs ---------- */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.field .hint{font-size:12.5px;color:var(--dim);margin-top:6px;letter-spacing:0;text-transform:none}
+.inrow{display:flex;align-items:center;gap:0}
+.inrow .unit{background:var(--bronze-deep);border:1px solid var(--bronze);border-right:0;color:var(--copper);
+  padding:11px 13px;border-radius:8px 0 0 8px;font-weight:600;white-space:nowrap}
+.inrow .unit.right{border-right:1px solid var(--bronze);border-left:0;border-radius:0 8px 8px 0}
+.inrow input,.inrow select{flex:1;min-width:0}
+input[type=number],input[type=text],select{
+  background:#0F0B07;border:1px solid var(--bronze);color:var(--text);
+  padding:11px 13px;border-radius:8px;font-size:16px;width:100%;
+  font-variant-numeric:tabular-nums}
+.inrow input{border-radius:0 8px 8px 0}
+.inrow .unit.right + input{border-radius:8px 0 0 8px}
+input:focus,select:focus{outline:none;border-color:var(--copper);box-shadow:0 0 0 2px rgba(192,128,64,.25)}
+input[type=range]{width:100%;accent-color:var(--copper);padding:0}
+.rangeline{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.rangeline .val{color:var(--copper);font-weight:700;font-size:18px}
+.optrow{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 16px}
+.chip{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);
+  border:1px solid var(--bronze);border-radius:999px;padding:7px 14px;cursor:pointer;user-select:none}
+.chip input{accent-color:var(--copper);margin:0}
+.toggle{border:1px solid var(--bronze);border-radius:10px;padding:16px;margin-bottom:16px;background:#170F0A}
+.toggle summary{cursor:pointer;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--copper);font-weight:600}
+.toggle .body{margin-top:14px}
+
+/* ---------- ledger ---------- */
+.ledger{border:1px solid var(--bronze);border-radius:10px;overflow:hidden;background:var(--surface)}
+.ledger .lrow{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:13px 20px;border-bottom:1px solid rgba(192,128,64,.14);
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 43px,rgba(192,128,64,.10) 43px,rgba(192,128,64,.10) 44px)}
+.ledger .lrow:last-child{border-bottom:0}
+.ledger .lname{color:var(--muted);font-size:14.5px}
+.ledger .lval{font-weight:700;color:var(--text);font-size:17px;white-space:nowrap}
+.ledger .lval.cop{color:var(--copper)}
+.ledger .lrow.total{background:rgba(122,74,34,.18)}
+.ledger .lrow.total .lval{color:var(--copper-hi);font-size:21px}
+
+/* ---------- verdict ---------- */
+.verdict{border:1px solid var(--copper);border-radius:12px;padding:30px 26px;text-align:center;
+  background:linear-gradient(180deg,rgba(192,128,64,.10),rgba(192,128,64,.02));position:relative;overflow:hidden}
+.verdict .vlabel{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--copper);margin-bottom:10px}
+.verdict .vnum{font-size:clamp(42px,8vw,68px);font-weight:700;color:var(--copper);line-height:1;margin:6px 0}
+.verdict .vwords{font-size:clamp(20px,3.6vw,28px);margin:14px 0 6px;color:var(--text);font-style:italic}
+.verdict .vexp{color:var(--muted);max-width:560px;margin:10px auto 0;font-size:15px}
+.meterbox{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+.meter{height:10px;border-radius:5px;background:#0D0A06;border:1px solid var(--bronze);overflow:hidden;margin:10px 0 6px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--bronze),var(--copper),var(--copper-hi));width:0;transition:width .8s ease}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-block;border:0;cursor:pointer;font-size:15px;font-weight:700;letter-spacing:.06em;
+  padding:13px 26px;border-radius:8px;text-decoration:none}
+.btn-cop{background:linear-gradient(180deg,var(--copper-hi),var(--copper));color:#170E05}
+.btn-cop:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;color:var(--copper);border:1px solid var(--copper)}
+.btn-ghost:hover{background:rgba(192,128,64,.12)}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.btn.sm{padding:9px 16px;font-size:13px}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 8px;text-align:right;border-bottom:1px solid rgba(192,128,64,.16);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{color:var(--copper);font-size:12px;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid var(--copper)}
+tbody tr:hover{background:rgba(192,128,64,.06)}
+td.hot{color:var(--warn);font-weight:700}
+td.warm{color:var(--copper-hi);font-weight:700}
+.scrollx{overflow-x:auto;border:1px solid var(--bronze);border-radius:10px;background:var(--surface)}
+.scrollx table{min-width:560px}
+
+/* ---------- scenarios ---------- */
+.scn{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  border:1px solid var(--bronze);border-radius:8px;padding:12px 16px;margin-bottom:10px;background:#170F0A}
+.scn .nm{font-weight:700;font-size:15px}
+.scn .dt{color:var(--dim);font-size:12.5px}
+.scn .ops{display:flex;gap:8px}
+.mini{background:transparent;border:1px solid var(--bronze);color:var(--copper);border-radius:6px;
+  padding:6px 12px;font-size:12.5px;cursor:pointer;font-weight:600}
+.mini:hover{background:rgba(192,128,64,.12)}
+.mini.danger{color:var(--warn);border-color:rgba(212,106,74,.5)}
+
+/* ---------- misc ---------- */
+.note{border-left:3px solid var(--copper);padding:10px 16px;color:var(--muted);font-size:14px;
+  background:rgba(192,128,64,.06);border-radius:0 8px 8px 0;margin:18px 0}
+.footnote{color:var(--dim);font-size:12.5px;margin-top:26px}
+footer.site{margin-top:60px;border-top:1px solid var(--bronze);padding-top:26px;color:var(--dim);font-size:13px;text-align:center}
+footer.site a{color:var(--copper)}
+.tabs{display:flex;gap:10px;margin-bottom:18px}
+.tab{flex:1;text-align:center;padding:11px;border:1px solid var(--bronze);border-radius:8px;cursor:pointer;
+  color:var(--muted);font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.tab.on{background:rgba(192,128,64,.16);color:var(--copper);border-color:var(--copper)}
+.hidden{display:none!important}
+.copy-ok{color:var(--copper);font-size:13px;margin-left:8px}
+.kicker{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--copper);margin:26px 0 8px}
+.big-cta{margin-top:26px}
+@media(max-width:560px){
+  .card{padding:20px}
+  .ledger .lval{font-size:15px}
+  .scn{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">The Bull Brew &middot; Buyer &amp; Investor Series</div>
+    <h1 class="serif">The <span class="cop">HOA Tax</span></h1>
+    <p class="dek">Dues look small per month. Over a hold, they become a <em>second mortgage you never applied for</em> — escalating every year, punctuated by five-figure special assessments. This ledger adds it all up: what you pay, what it would have earned, and whether your deal survives it.</p>
+  </header>
+
+  <div class="rule"><span>&#10086;</span></div>
+
+  <div class="grid inputs">
+    <!-- ============ INPUTS ============ -->
+    <section class="card">
+      <h2 class="serif"><span class="no">I.</span>Your numbers</h2>
+      <p class="sub">Everything stays in your browser. Nothing leaves this page.</p>
+
+      <div class="tabs" id="modeTabs">
+        <div class="tab on" data-mode="buyer">Home buyer</div>
+        <div class="tab" data-mode="investor">Investor</div>
+      </div>
+
+      <div class="field">
+        <label for="price">Purchase price</label>
+        <div class="inrow"><span class="unit">$</span><input type="number" id="price" value="450000" min="0" step="1000"></div>
+      </div>
+
+      <div class="field">
+        <label for="dues">Monthly HOA dues</label>
+        <div class="inrow"><span class="unit">$</span><input type="number" id="dues" value="450" min="0" step="5"></div>
+        <div class="hint">What the board charges today — not what they'll charge in year 8.</div>
+      </div>
+
+      <div class="field">
+        <label for="esc">Annual dues increase</label>
+        <div class="rangeline"><span class="hint" style="margin:0">Boards rarely cut dues. The national average raise runs 3–6%/yr.</span><span class="val num" id="escVal">4.0%</span></div>
+        <input type="range" id="esc" min="0" max="10" step="0.5" value="4">
+      </div>
+
+      <div class="field">
+        <label for="years">Holding period</label>
+        <div class="rangeline"><span class="hint" style="margin:0">How long you'll own it.</span><span class="val num" id="yearsVal">10 yrs</span></div>
+        <input type="range" id="years" min="1" max="30" step="1" value="10">
+      </div>
+
+      <div class="field">
+        <label for="opp">Opportunity rate</label>
+        <div class="rangeline"><span class="hint" style="margin:0">What those dollars would earn elsewhere. Long-run stock returns ≈ 7–8%.</span><span class="val num" id="oppVal">7.0%</span></div>
+        <input type="range" id="opp" min="0" max="12" step="0.5" value="7">
+      </div>
+
+      <details class="toggle" open>
+        <summary>Special assessment (optional)</summary>
+        <div class="body">
+          <div class="field">
+            <label for="saAmt">Assessment amount</label>
+            <div class="inrow"><span class="unit">$</span><input type="number" id="saAmt" value="0" min="0" step="500"></div>
+            <div class="hint">Roof job, facade work, elevator — the board's favorite surprise. Enter 0 if you feel lucky.</div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="saYear">Hits in year</label>
+            <input type="number" id="saYear" value="5" min="1" max="30" step="1">
+          </div>
+        </div>
+      </details>
+
+      <div id="investorFields" class="hidden">
+        <div class="field">
+          <label for="rent">Monthly rent</label>
+          <div class="inrow"><span class="unit">$</span><input type="number" id="rent" value="3200" min="0" step="25"></div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label for="piti">Monthly PITI</label>
+          <div class="inrow"><span class="unit">$</span><input type="number" id="piti" value="2500" min="0" step="25"></div>
+          <div class="hint">Principal + interest + taxes + insurance, before HOA.</div>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn btn-cop" id="calcBtn">Run the ledger</button>
+        <button class="btn btn-ghost sm" id="saveBtn">Save scenario</button>
+        <span class="copy-ok hidden" id="saveOk">Saved.</span>
+      </div>
+    </section>
+
+    <!-- ============ VERDICT ============ -->
+    <section>
+      <div class="verdict">
+        <div class="vlabel">True lifetime cost of the HOA</div>
+        <div class="vnum serif num" id="vNum">$0</div>
+        <div class="vwords serif" id="vWords">&mdash;</div>
+        <p class="vexp" id="vExp">Run the ledger to see the damage.</p>
+        <div class="meterbox">
+          <div class="kicker" style="margin:0 0 4px">Dues as a share of the price you paid</div>
+          <div class="meter"><i id="meterFill"></i></div>
+          <div class="num" style="color:var(--muted);font-size:14px"><span id="pctPrice" style="color:var(--copper);font-weight:700">0%</span> of the purchase price, gone in dues</div>
+        </div>
+      </div>
+
+      <div class="ledger" style="margin-top:18px" id="ledger">
+        <div class="lrow"><span class="lname">Dues today (per month)</span><span class="lval num" id="lDuesNow">—</span></div>
+        <div class="lrow"><span class="lname">Dues in your final year (per month)</span><span class="lval num" id="lDuesEnd">—</span></div>
+        <div class="lrow"><span class="lname">Total dues paid over the hold</span><span class="lval num cop" id="lDuesTotal">—</span></div>
+        <div class="lrow"><span class="lname">Special assessments</span><span class="lval num" id="lSA">—</span></div>
+        <div class="lrow"><span class="lname">What those dollars would have earned</span><span class="lval num cop" id="lOpp">—</span></div>
+        <div class="lrow total"><span class="lname">The real tax: paid + forfeited growth</span><span class="lval num" id="lReal">—</span></div>
+        <div class="lrow"><span class="lname">Burn rate (per day of ownership)</span><span class="lval num" id="lPerDay">—</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ SURVIVAL ============ -->
+  <div class="grid two">
+    <section class="card" id="survivalCard">
+      <h2 class="serif"><span class="no">II.</span>Does the deal survive the dues?</h2>
+      <p class="sub">Investor framing: rent and PITI from your numbers, dues from the ledger.</p>
+      <div class="ledger">
+        <div class="lrow"><span class="lname">Monthly cash flow <em>before</em> HOA</span><span class="lval num" id="sPre">—</span></div>
+        <div class="lrow"><span class="lname">Monthly cash flow <em>after</em> HOA</span><span class="lval num" id="sPost">—</span></div>
+        <div class="lrow"><span class="lname">Dues as a share of rent</span><span class="lval num cop" id="sShare">—</span></div>
+        <div class="lrow"><span class="lname">10-year cash flow lost to dues</span><span class="lval num" id="sLost">—</span></div>
+      </div>
+      <div class="note" id="sNote">Flip to the Investor tab and run the ledger to see if the dues kill the deal.</div>
+    </section>
+
+    <section class="card">
+      <h2 class="serif"><span class="no">III.</span>The escalation trap</h2>
+      <p class="sub">Same dues, different boards. Lifetime dues paid across escalation rates and hold lengths — before assessments or opportunity cost.</p>
+      <div class="scrollx"><table id="escTable" aria-label="Lifetime dues by escalation rate and holding period"></table></div>
+      <div class="note">A 2% difference in the annual increase doubles the damage over a long hold. Ask the board for five years of dues history before you buy.</div>
+    </section>
+  </div>
+
+  <!-- ============ SCENARIOS ============ -->
+  <section class="card" style="margin-top:18px">
+    <h2 class="serif"><span class="no">IV.</span>Saved scenarios</h2>
+    <p class="sub">Compare the HOA-tax on every property you're watching. Stored only in this browser.</p>
+    <div id="scnList"><p class="sub">No scenarios saved yet.</p></div>
+    <div class="btnrow">
+      <button class="btn btn-ghost sm" id="copyBtn">Copy summary</button>
+      <span class="copy-ok hidden" id="copyOk">Copied.</span>
+    </div>
+  </section>
+
+  <div class="note">
+    <strong class="serif" style="color:var(--text)">The method.</strong>
+    Dues compound monthly off your escalation rate; opportunity cost compounds annually at your rate on every dollar paid — that's the "real tax" honest number, because money spent on dues is money not compounding somewhere else. Special assessments are added flat in the year they land. Dues escalation near inflation is normal; anything above 5%/yr sustained means a board funding deferred maintenance with your wallet. And the standing filter: <em>if the numbers only work because you pretend the dues won't rise, they don't work.</em>
+  </div>
+
+  <p class="footnote">For illustration only — not financial, tax, or legal advice. HOA budgets, reserves, and special-assessment risk vary wildly by building; read the resale package, not the listing copy.</p>
+
+  <footer class="site">
+    Built by <a href="https://github.com/thebullbrew">The Bull Brew</a> &middot; one useful tool, every day &middot; <a href="https://github.com/thebullbrew/hoa-tax">Source</a>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const money = n => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("en-US");
+const pct1 = n => (n * 100).toFixed(1) + "%";
+const num = (id, dflt) => { const v = parseFloat($(id).value); return isNaN(v) || v < 0 ? dflt : v; };
+let mode = "buyer";
+
+/* ---------- core math ---------- */
+function calc() {
+  const price = num("price", 0);
+  const dues0 = num("dues", 0);
+  const esc = num("esc", 0) / 100;
+  const yrs = Math.round(num("years", 1));
+  const opp = num("opp", 0) / 100;
+  const saAmt = num("saAmt", 0);
+  const saYear = Math.min(Math.round(num("saYear", 1)), yrs);
+
+  let duesPaid = 0, oppFV = 0;
+  const annualDues = [];
+  for (let y = 1; y <= yrs; y++) {
+    const a = 12 * dues0 * Math.pow(1 + esc, y - 1);
+    annualDues.push(a);
+    duesPaid += a;
+    oppFV += a * Math.pow(1 + opp, yrs - y);        // year-end flows grown to end of hold
+  }
+  const sa = saAmt > 0 ? saAmt * Math.pow(1 + opp, yrs - saYear) : 0; // assessment also carries opportunity cost
+  const lifetime = duesPaid + saAmt;
+  const realTax = oppFV + saAmt;                    // cash paid + forfeited growth (dues at FV; SA at FV)
+  const duesEnd = dues0 * Math.pow(1 + esc, yrs - 1);
+  const perDay = lifetime / (365 * yrs);
+  const pctOfPrice = price > 0 ? lifetime / price : 0;
+
+  return { price, dues0, esc, yrs, opp, saAmt, saYear, duesPaid, oppFV, lifetime, realTax, duesEnd, perDay, pctOfPrice, annualDues };
+}
+
+/* ---------- verdicts ---------- */
+function buyerVerdict(r) {
+  const p = r.pctOfPrice;
+  if (r.dues0 <= 0) return { w: "No dues entered.", e: "Enter the monthly dues and run it again — then come back and read this with fresh eyes." };
+  if (p < 0.10) return { w: "A toll you can afford to grumble about.", e: "Under a tenth of the price over your whole hold. Pay it, keep the reserves healthy, move on." };
+  if (p < 0.20) return { w: "A second mortgage you never applied for.", e: "More than a tenth of the purchase price — vanished into dues before a dollar of equity compounds. Make sure the building earns it: read the reserve study, not the lobby." };
+  return { w: "You didn't buy a home, you bought a subscription.", e: "Over a fifth of the purchase price disappears into dues. Unless the location or the unit is irreplaceable, walk — buildings like this are where wealth goes to be managed by a committee." };
+}
+function investorVerdict(r) {
+  const rent = num("rent", 0), piti = num("piti", 0);
+  if (rent <= 0) return { w: "Flip to the Investor tab.", e: "Add rent and PITI to see whether the dues kill the deal." };
+  const share = r.dues0 / rent;
+  const pre = rent - piti, post = rent - piti - r.dues0;
+  if (post < 0) return { w: "The dues kill the deal. Full stop.", e: "Rent can't even cover PITI plus dues. This property is a liability wearing a house costume." };
+  if (share > 0.20) return { w: "The HOA is your equity partner — and you never agreed.", e: "Over a fifth of the rent goes to the board before you see a dime. Your cash-on-cash return is being taxed by a committee that doesn't answer to you." };
+  if (share > 0.10) return { w: "A silent partner taking a real cut.", e: "A tenth to a fifth of every rent check funds the HOA. Price the dues growth into your underwriting — if it doesn't survive 5% annual increases, it doesn't survive." };
+  return { w: "Survivable — barely.", e: "Dues stay under a tenth of rent. Still underwrite the escalation: boards raise dues like landlords raise rent, except you can't move out of the board." };
+}
+
+/* ---------- render ---------- */
+function render() {
+  const r = calc();
+  $("vNum").textContent = money(r.realTax);
+  const v = mode === "buyer" ? buyerVerdict(r) : investorVerdict(r);
+  $("vWords").textContent = "\u201C" + v.w + "\u201D";
+  $("vExp").textContent = v.e;
+  $("pctPrice").textContent = pct1(r.pctOfPrice);
+  $("meterFill").style.width = Math.min(100, r.pctOfPrice * 100) + "%";
+
+  $("lDuesNow").textContent = money(r.dues0) + "/mo";
+  $("lDuesEnd").textContent = money(r.duesEnd) + "/mo";
+  $("lDuesTotal").textContent = money(r.duesPaid);
+  $("lSA").textContent = r.saAmt > 0 ? money(r.saAmt) + " (yr " + r.saYear + ")" : "$0";
+  $("lOpp").textContent = money(r.oppFV - r.duesPaid);
+  $("lReal").textContent = money(r.realTax);
+  $("lPerDay").textContent = money(r.perDay) + "/day";
+
+  renderTable(r);
+  renderSurvival(r);
+  return r;
+}
+
+function renderTable(r) {
+  const escs = [0, 3, 5, 8], yrCols = [5, 10, 15, 20, 30];
+  let h = "<thead><tr><th>Escalation</th>" + yrCols.map(y => "<th>" + y + " yrs</th>").join("") + "</tr></thead><tbody>";
+  for (const e of escs) {
+    h += "<tr><td>" + e + "%/yr</td>";
+    for (const y of yrCols) {
+      let t = 0;
+      for (let k = 1; k <= y; k++) t += 12 * r.dues0 * Math.pow(1 + e / 100, k - 1);
+      const cls = (e === r.esc * 100 && y === r.yrs) ? ' class="warm"' : (e >= 5 && y >= 15 ? ' class="hot"' : "");
+      h += "<td" + cls + ">" + money(t) + "</td>";
+    }
+    h += "</tr>";
+  }
+  $("escTable").innerHTML = h + "</tbody>";
+}
+
+function renderSurvival(r) {
+  const rent = num("rent", 0), piti = num("piti", 0);
+  if (mode !== "investor" || rent <= 0) {
+    $("sPre").textContent = $("sPost").textContent = $("sShare").textContent = $("sLost").textContent = "—";
+    $("sNote").textContent = "Flip to the Investor tab and run the ledger to see if the dues kill the deal.";
+    return;
+  }
+  const pre = rent - piti, post = rent - piti - r.dues0;
+  const share = rent > 0 ? r.dues0 / rent : 0;
+  const lost = Math.min(10, r.yrs);
+  let lostSum = 0;
+  for (let y = 1; y <= lost; y++) lostSum += 12 * r.dues0 * Math.pow(1 + r.esc, y - 1);
+  $("sPre").textContent = money(pre) + "/mo";
+  $("sPost").textContent = money(post) + "/mo";
+  $("sShare").textContent = pct1(share);
+  $("sLost").textContent = money(lostSum);
+  const v = investorVerdict(r);
+  $("sNote").innerHTML = "<strong class=\"serif\" style=\"color:var(--text)\">\u201C" + v.w + "\u201D</strong><br>" + v.e;
+}
+
+/* ---------- scenarios (localStorage) ---------- */
+const LSKEY = "hoa-tax-scenarios-v1";
+const getScn = () => { try { return JSON.parse(localStorage.getItem(LSKEY)) || []; } catch (e) { return []; } };
+const setScn = s => localStorage.setItem(LSKEY, JSON.stringify(s));
+function snapshot() {
+  return { price: num("price",0), dues: num("dues",0), esc: num("esc",0), years: Math.round(num("years",1)),
+    opp: num("opp",0), saAmt: num("saAmt",0), saYear: Math.round(num("saYear",1)),
+    mode, rent: num("rent",0), piti: num("piti",0), when: new Date().toLocaleDateString() };
+}
+function applyScn(s) {
+  $("price").value = s.price; $("dues").value = s.dues; $("esc").value = s.esc; $("years").value = s.years;
+  $("opp").value = s.opp; $("saAmt").value = s.saAmt; $("saYear").value = s.saYear;
+  setMode(s.mode || "buyer");
+  $("rent").value = s.rent || 0; $("piti").value = s.piti || 0;
+  syncRangeLabels(); render();
+}
+function renderScn() {
+  const list = $("scnList"), arr = getScn();
+  if (!arr.length) { list.innerHTML = "<p class=\"sub\">No scenarios saved yet.</p>"; return; }
+  list.innerHTML = "";
+  arr.forEach((s, i) => {
+    const r = calcFor(s);
+    const d = document.createElement("div"); d.className = "scn";
+    d.innerHTML = "<div><div class=\"nm\">" + esc(s.name || ("Scenario " + (i + 1))) + "</div>" +
+      "<div class=\"dt num\">" + money(r.realTax) + " real tax &middot; " + money(s.dues) + "/mo dues &middot; " + s.when + "</div></div>";
+    const ops = document.createElement("div"); ops.className = "ops";
+    const load = document.createElement("button"); load.className = "mini"; load.textContent = "Load";
+    load.onclick = () => applyScn(s);
+    const del = document.createElement("button"); del.className = "mini danger"; del.textContent = "Delete";
+    del.onclick = () => { const a = getScn(); a.splice(i, 1); setScn(a); renderScn(); };
+    ops.append(load, del); d.append(ops); list.append(d);
+  });
+}
+function calcFor(s) { // calc with snapshot values
+  const esc = s.esc / 100, opp = s.opp / 100;
+  let duesPaid = 0, oppFV = 0;
+  for (let y = 1; y <= s.years; y++) {
+    const a = 12 * s.dues * Math.pow(1 + esc, y - 1);
+    duesPaid += a; oppFV += a * Math.pow(1 + opp, s.years - y);
+  }
+  const sy = Math.min(s.saYear || 1, s.years);
+  const realTax = oppFV + (s.saAmt > 0 ? s.saAmt * Math.pow(1 + opp, s.years - sy) : 0);
+  return { realTax };
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- copy summary ---------- */
+function summaryText(r) {
+  const v = mode === "buyer" ? buyerVerdict(r) : investorVerdict(r);
+  let t = "THE HOA TAX — " + money(r.price) + " property, " + money(r.dues0) + "/mo dues\n";
+  t += "Hold: " + r.yrs + " yrs @ " + (r.esc * 100).toFixed(1) + "% annual dues increase\n";
+  t += "Dues paid: " + money(r.duesPaid) + (r.saAmt > 0 ? " + " + money(r.saAmt) + " special assessment (yr " + r.saYear + ")" : "") + "\n";
+  t += "Forfeited growth @ " + (r.opp * 100).toFixed(1) + "%: " + money(r.oppFV - r.duesPaid) + "\n";
+  t += "TRUE LIFETIME COST: " + money(r.realTax) + " (" + pct1(r.pctOfPrice) + " of price)\n";
+  t += "Verdict: " + v.w;
+  return t;
+}
+
+/* ---------- wiring ---------- */
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll("#modeTabs .tab").forEach(t => t.classList.toggle("on", t.dataset.mode === m));
+  $("investorFields").classList.toggle("hidden", m !== "investor");
+  render();
+}
+function syncRangeLabels() {
+  $("escVal").textContent = num("esc",0).toFixed(1) + "%";
+  $("yearsVal").textContent = Math.round(num("years",1)) + " yrs";
+  $("oppVal").textContent = num("opp",0).toFixed(1) + "%";
+}
+document.querySelectorAll("#modeTabs .tab").forEach(t => t.addEventListener("click", () => setMode(t.dataset.mode)));
+["price","dues","esc","years","opp","saAmt","saYear","rent","piti"].forEach(id => {
+  $(id).addEventListener("input", () => { syncRangeLabels(); render(); });
+});
+$("calcBtn").addEventListener("click", render);
+$("saveBtn").addEventListener("click", () => {
+  const s = snapshot();
+  s.name = prompt("Name this scenario (e.g. 12 Oak St condo):", "Scenario " + (getScn().length + 1));
+  if (s.name === null) return;
+  const a = getScn(); a.push(s); setScn(a); renderScn();
+  $("saveOk").classList.remove("hidden"); setTimeout(() => $("saveOk").classList.add("hidden"), 1500);
+});
+$("copyBtn").addEventListener("click", async () => {
+  const txt = summaryText(render());
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) { const ta = document.createElement("textarea"); ta.value = txt; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  $("copyOk").classList.remove("hidden"); setTimeout(() => $("copyOk").classList.add("hidden"), 1500);
+});
+
+syncRangeLabels(); render(); renderScn();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
